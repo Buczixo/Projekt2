@@ -133,9 +133,9 @@ fun LightSensorBarPreview() {
 }
 
 @Composable
-fun AccelerometerBar() {
+fun AccelerometerBar(direction : String) {
     val context = LocalContext.current
-    var rotationX by remember { mutableStateOf(0f) }
+    var rotation by remember { mutableStateOf(0f) }
 
     var sensorManager: SensorManager? = null
     var gyroscopeSensor: Sensor? = null
@@ -147,7 +147,12 @@ fun AccelerometerBar() {
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 event?.let {
-                    rotationX = event.values[0]
+                    if (direction == "X") 
+                        rotation = event.values[0]
+                    else if (direction == "Y")
+                        rotation = event.values[1]
+                    else if (direction == "Z")
+                        rotation = event.values[2]
                 }
             }
 
@@ -177,20 +182,26 @@ fun AccelerometerBar() {
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
-                    .background(Color.Blue.copy(alpha = (rotationX.roundToInt().toFloat().absoluteValue / 20)))
+                    .background(
+                        Color.Blue.copy(
+                            alpha = (rotation
+                                .roundToInt()
+                                .toFloat().absoluteValue / 20)
+                        )
+                    )
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "RotationX X: $rotationX", style = MaterialTheme.typography.bodySmall)
+        Text(text = "Rotation " + direction + " to: $rotation", style = MaterialTheme.typography.bodySmall)
     }
 
 @Preview(showBackground = true)
 @Composable
 fun AccelerometerBarPreview() {
     Projekt2Theme {
-        AccelerometerBar()
+        AccelerometerBar("X")
     }
 }
 
@@ -243,7 +254,7 @@ fun  EkranDrugi(param: String, navController: NavController){
             text = "Witaj na ekranie 2",
             modifier = Modifier.clickable {  },
         )
-        AccelerometerBar()
+        AccelerometerBar("X")
         Button(onClick = { navController.navigate("third_screen") }) {
             Text(text = "Idz do ekranu nr. 3")
         }
@@ -255,8 +266,7 @@ fun  EkranTrzeci(navController: NavController){
     val context = LocalContext.current
     Column (
         Modifier
-            .fillMaxSize()
-            .background(Color.Blue),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ){
@@ -266,6 +276,7 @@ fun  EkranTrzeci(navController: NavController){
         Button(onClick = { navController.navigate("A") }) {
             Text(text = "Wróć na ekran główny")
         }
+        AccelerometerBar(direction = "Y")
 
         Button(onClick = { Toast.makeText(context, "A może tościka?", Toast.LENGTH_SHORT).show()}
         ) {
