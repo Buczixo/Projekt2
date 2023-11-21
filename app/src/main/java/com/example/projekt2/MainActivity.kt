@@ -18,10 +18,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
@@ -124,14 +124,6 @@ fun LightSensorBar() {
     }
 
 
-@Preview(showBackground = true)
-@Composable
-fun LightSensorBarPreview() {
-    Projekt2Theme {
-        LightSensorBar()
-    }
-}
-
 @Composable
 fun AccelerometerBar(direction : String) {
     val context = LocalContext.current
@@ -175,13 +167,13 @@ fun AccelerometerBar(direction : String) {
         Box(
             modifier = Modifier
                 .size(200.dp)
-                .clip(CircleShape)
+                .clip(RectangleShape)
                 .background(Color.Gray)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(CircleShape)
+                    .clip(RectangleShape)
                     .background(
                         Color.Blue.copy(
                             alpha = (rotation
@@ -197,15 +189,59 @@ fun AccelerometerBar(direction : String) {
         Text(text = "Rotation " + direction + " to: $rotation", style = MaterialTheme.typography.bodySmall)
     }
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
-fun AccelerometerBarPreview() {
-    Projekt2Theme {
-        AccelerometerBar("X")
+fun ProximityBar() {
+    val context = LocalContext.current
+    var prox by remember { mutableStateOf(0f) }
+
+    var sensorManager: SensorManager? = null
+    var proxSensor: Sensor? = null
+
+    DisposableEffect(context) {
+        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        proxSensor = sensorManager?.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+
+        val sensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                event?.let {
+                    prox = it.values[0]
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                // Do nothing for now
+            }
+        }
+
+        sensorManager?.registerListener(sensorEventListener, proxSensor, SensorManager.SENSOR_DELAY_NORMAL)
+
+        onDispose {
+            sensorManager?.unregisterListener(sensorEventListener)
+        }
     }
+
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .clip(RectangleShape)
+            .background(Color.Gray)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(prox/10)
+                .clip(RectangleShape)
+                .background(Color.Yellow.copy(alpha = prox / 10))
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(text = "Proximity: $prox", style = MaterialTheme.typography.bodySmall)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GreetingWithInput(onNavigateToScreen2: (String) -> Unit) {
     var textFieldState by remember {
@@ -228,15 +264,6 @@ fun GreetingWithInput(onNavigateToScreen2: (String) -> Unit) {
 
         // Display the text
 
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Projekt2Theme {
-        Nav()
     }
 }
 
@@ -276,7 +303,7 @@ fun  EkranTrzeci(navController: NavController){
         Button(onClick = { navController.navigate("A") }) {
             Text(text = "Wróć na ekran główny")
         }
-        AccelerometerBar(direction = "Y")
+        ProximityBar()
 
         Button(onClick = { Toast.makeText(context, "A może tościka?", Toast.LENGTH_SHORT).show()}
         ) {
