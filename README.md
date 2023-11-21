@@ -1,6 +1,10 @@
 # Projekt 2
 Od razu zrobione na 5.0 więc aplikacja zawiera wszystko !
 
+Pierwszy ekrn - czujnik oświetlenia
+Drugi ekran - czujnik żyroskopu oś X
+Trzeci ekran - czujnik zbliżeniowy (ma progress bar !)
+
 Ten projekt polegał na obsłudze czujników, wizualizacji danych z czujników oraz czujników na wielu ekranach.
 
 |Ocena|Zadanie|
